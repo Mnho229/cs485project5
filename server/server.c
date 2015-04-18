@@ -1,6 +1,5 @@
 #include "csapp.h"
 
-using namespace std; 
 void echo(int connfd)
 {
 	size_t n;
@@ -10,7 +9,7 @@ void echo(int connfd)
 	Rio_readinitb(&rio,connfd);
 	while(n = Rio_readlineb(&rio,buf,MAXLINE)!= 0)
 	{
-		cout << "Server received " << n << " bytes" << endl; 
+		//std:cout << "Server received " << n << " bytes" << endl; 
 		Rio_writen(connfd,buf,n); 
 	} 
 
