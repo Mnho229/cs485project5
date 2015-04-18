@@ -1,26 +1,37 @@
 #include "csapp.h"
+#include "mycloud.h"
+#include <iostream>
+#include <stdlib.h>
+#include <fstream>
+
+using namespace std;
 
 int main(int argc, char **argv) 
 {
-    int clientfd, port;
-    char *host, buf[MAXLINE];
+    int clientfd, port, key;
+    char *host, filename;
     rio_t rio;
 
-    if (argc != 3) {
-		fprintf(stderr, "usage: %s <host> <port>\n", argv[0]);
+    if (argc != 4) {
+		fprintf(stderr, "usage: %s <host> <port> <key> <filename>\n", argv[0]);
 		exit(0);
     }
     host = argv[1];
     port = atoi(argv[2]);
+    key = atoi(argv[3]);
+    filename = argv[4];
 
-    clientfd = Open_clientfd(host, port);
-    Rio_readinitb(&rio, clientfd);
+    fstream queryFile;
 
-    while (Fgets(buf, MAXLINE, stdin) != NULL) {
-		Rio_writen(clientfd, buf, strlen(buf));
-		Rio_readlineb(&rio, buf, MAXLINE);
-		Fputs(buf, stdout);
+    queryFile.open(filename);
+
+    string temp;
+    string data;
+
+    while(getline(queryFile, temp)) {
+        data = data + temp + "\n";
     }
-    Close(clientfd); //line:netp:echoclient:close
+
+    mycloud_putfile(host, port, key, filename, data.c_str(), data.length() );
     exit(0);
 }
