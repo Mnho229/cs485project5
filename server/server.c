@@ -2,14 +2,14 @@
 
 void echo(int connfd)
 {
-	size_t n;
+	int n;
 	char buf[MAXLINE];
 	rio_t rio; 
 
 	Rio_readinitb(&rio,connfd);
 	while(n = Rio_readlineb(&rio,buf,MAXLINE)!= 0)
 	{
-		//std:cout << "Server received " << n << " bytes" << endl; 
+		printf("server received %d bytes\n", n);
 		Rio_writen(connfd,buf,n); 
 	} 
 
