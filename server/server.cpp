@@ -25,15 +25,15 @@ int main(int argc, char **argv)
     struct sockaddr_in clientaddr;
     struct hostent *hp;
     char *haddrp;
-    
-    if (argc != 2) 
+	char *Secret_Key;     
+    if (argc != 3) 
     {
 		fprintf(stderr, "usage: %s <port>\n", argv[0]);
 		exit(0);
     }
 
     port = atoi(argv[1]);
-
+    strcpy() 
     listenfd = Open_listenfd(port);
     while (1) 
     {
