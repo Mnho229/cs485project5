@@ -7,11 +7,16 @@ void echo(int connfd)
 	rio_t rio; 
 
 	Rio_readinitb(&rio,connfd);
-	while(n = Rio_readlineb(&rio,buf,MAXLINE)!= 0)
+	while((n = Rio_readlineb(&rio,buf,MAXLINE))!= 0)
 	{
+
 		printf("server received %d bytes\n", n);
-		Rio_writen(connfd,buf,n); 
+		printf("buff: %s\n", buf);
+		Rio_writen(connfd,buf,n);
+		printf("After rio_writen\n");
+		//Rio_writen(connfd,"\nsomething",n) 
 	} 
+	printf("left echo\n");
 
 }
 
