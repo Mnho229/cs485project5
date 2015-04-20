@@ -21,17 +21,6 @@ int main(int argc, char **argv)
     key = atoi(argv[3]);
     filename = argv[4];
 
-    fstream queryFile;
-
-    queryFile.open(filename);
-
-    string temp;
-    string data;
-
-    while(getline(queryFile, temp)) {
-        data = data + temp + "\n";
-    }
-
-    int request = mycloud_putfile(host, port, key, filename, data.c_str(), data.length() );
+    int request = mycloud_delfile(host, port, key, filename);
     exit(0);
 }
