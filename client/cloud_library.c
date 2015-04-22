@@ -3,6 +3,7 @@
 #define FILE_SIZE 100000
 #define REQUEST_SIZE 4
 #define DNS_SIZE 40
+
 int mycloud_putfile(char *MachineName, int TCPport, int SecretKey, char *Filename, char *data, int datalen)
 {
 	int clientfd; 
@@ -65,7 +66,7 @@ int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 	messageSize =  key_size + REQUEST_SIZE + NAME_SIZE;
 
 
-	message = (char *)malloc(sizeof(char)*message_buf); 
+	message = (char *) malloc(sizeof(char)*message_buf); 
 
 	if(message == NULL)
 	{
@@ -90,7 +91,9 @@ int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 	free(message); 
 
 	size_t num; 
-	int STATUS_SIZE = 
+	int STATUS_SIZE = REQUEST_SIZE + FILE_SIZE + 4; 
+	char buffer[STATUS_SIZE]; 
+	
 }
 int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filename)
 {
