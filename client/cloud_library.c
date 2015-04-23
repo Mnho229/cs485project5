@@ -57,7 +57,7 @@ int mycloud_putfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 	
 }
 
-int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filename, char *data, int datalen)
+int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filename, char **data, int *datalen)
 {
 	int clientfd; 
 	char *message;
