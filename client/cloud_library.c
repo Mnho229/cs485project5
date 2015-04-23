@@ -18,7 +18,7 @@ int mycloud_putfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 
 	if(message == NULL)
 	{
-		printf(stderr, "Memory Error -> mcputs\n"); 
+		fprintf(stderr, "Memory Error -> mcputs\n"); 
 	} 
 	char *message_buf = message; 
 
@@ -66,11 +66,11 @@ int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 	messageSize =  key_size + REQUEST_SIZE + NAME_SIZE;
 
 
-	message = (char *) malloc(sizeof(char)*message_buf); 
+	message = (char *) malloc(sizeof(char)*messageSize); 
 
 	if(message == NULL)
 	{
-		printf(stderr,"Memory Error - mcgets\n"); 
+		fprintf(stderr,"Memory Error - mcgets\n"); 
 	}
 	char *message_buf = message; 
 
@@ -93,7 +93,7 @@ int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 	size_t num; 
 	int currStat = 4; 
 	int NEW_STATUS_SIZE = REQUEST_SIZE + FILE_SIZE + currStat; 
-	char buffer[STATUS_SIZE]; 
+	char buffer[NEW_STATUS_SIZE]; 
 	char file_buf[4];
 	char file_data[FILE_SIZE]; 
 	unsigned int stat; 
@@ -117,14 +117,14 @@ int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 		*data = (char*) malloc (sizeof(char)*fileSize); 
 		if(*data == NULL)
 		{
-			fprintf(stdeff, "Memory Error ~ mcget\n");
+			fprintf(stderr, "Memory Error ~ mcget\n");
 			return -1; 
 		}
 	}
 
 	else
 	{
-		status = -1; 
+		stat = -1; 
 	}
 
 	Close(clientfd); 
@@ -138,11 +138,11 @@ int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 	unsigned int messageSize, netOrder; 
 	int key_size = (SecretKey == 0 ? 1 : (int)(log10(SecretKey)+1));
 	messageSize =  key_size + REQUEST_SIZE + NAME_SIZE;
-	message = (char *) malloc(sizeof(char)*message_buf); 
+	message = (char *) malloc(sizeof(char)*messageSize); 
 
 	if(message == NULL)
 	{
-		printf(stderr,"Memory Error ~ // mcdel\n"); 
+		fprintf(stderr,"Memory Error ~ // mcdel\n"); 
 	}
 	char *message_buf = message; 
 
@@ -164,7 +164,7 @@ int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 
 	size_t num; 
 	int currStat = 4;
-	char buffer[STATUS_SIZE]; 
+	char buffer[currStat]; 
 	unsigned int stat; 
 	rio_t rio; 
 
@@ -186,11 +186,11 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
 	unsigned int messageSize, netOrder; 
 	int key_size = (SecretKey == 0 ? 1 : (int)(log10(SecretKey)+1));
 	messageSize =  key_size + REQUEST_SIZE + NAME_SIZE;
-	message = (char *) malloc(sizeof(char)*message_buf); 
+	message = (char *) malloc(sizeof(char)*messageSize); 
 
 	if(message == NULL)
 		{
-			printf(stderr,"Memory Error ~ // list files\n"); 
+			fprintf(stderr,"Memory Error ~ // list files\n"); 
 		}
 	char *message_buf = message; 
 
@@ -209,7 +209,7 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
 
 	size_t num; 
 	int currStat = 4;
-	char Sat_Buffer[STATUS_SIZE];
+	char Sat_Buffer[currStat];
 	char listsize[4]; 
 	char list[FILE_SIZE]; 
 	unsigned int stat; 
@@ -218,7 +218,7 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
 	Rio_readinitb(&rio,clientfd); 
 	int max = 4; 
 
-	if((num = Rio_readnb(&rio,buffer,currStat, )) == currStat)
+	if((num = Rio_readnb(&rio,buffer,currStat)) == currStat)
 	{
 		memcpy(&netOrder,&buffer,currStat);
 		stat = ntohl(netOrder); 
