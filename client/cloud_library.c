@@ -220,7 +220,7 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
 
 	if((num = Rio_readnb(&rio,Stat_Buffer,currStat)) == currStat)
 	{
-		memcpy(&netOrder,&Stat_buffer,currStat);
+		memcpy(&netOrder,&Stat_Buffer,currStat);
 		stat = ntohl(netOrder); 
 	} 
 	else
@@ -231,7 +231,7 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
 	if((num = Rio_readnb(&rio,listsize,max)) == max)
 	{
 		 memcpy(&netOrder,&listsize,max); 
-		 listbuflen = ntohl(netOrder); 
+		 *listbuflen = ntohl(netOrder); 
 	}
 	else
 	{
