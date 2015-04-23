@@ -8,10 +8,11 @@ extern "C" {
 
 using namespace std;
 
-int main(int argc, char **argv) 
+int main(int argc, char *argv[]) 
 {
-    int clientfd, port, key;
-    char *host, *filename;
+    int clientfd, port, key, list_length;
+    char *list_buff;
+    char *host;
     rio_t rio;
 
     if (argc != 5) {
@@ -21,8 +22,11 @@ int main(int argc, char **argv)
     host = argv[1];
     port = atoi(argv[2]);
     key = atoi(argv[3]);
-    filename = argv[4];
 
-    int request = mycloud_delfile(host, port, key, filename);
+    int request = mycloud_listfiles(host, port, key, &list_buff, &list_length);
+
+    if (request == 0) {
+        cout << list_buff << endl;
+    }
     exit(0);
 }
