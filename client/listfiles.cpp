@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char *argv[]) 
 {
     int port, key;
-    int list_length;
+    unsigned int list_length;
     char *list_buff;
     char *host;
 
@@ -26,7 +26,11 @@ int main(int argc, char *argv[])
     int request = mycloud_listfiles(host, port, key, &list_buff, &list_length);
 
     if (request == 0) {
-        cout << list_buff << endl;
+        char fileName[80];
+        for (int i = 0; i < list_length ; i+=80) {
+            memcpy(&fileName, list_buff + i, 80);
+            printf("%s\n", fileName);
+        }
     }
     exit(0);
 }

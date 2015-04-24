@@ -232,7 +232,7 @@ int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
   return stat;
 
 }
-int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, int *list_len) 
+int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, unsigned int *list_len) 
 {
 
   int clientfd;
@@ -301,7 +301,6 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
   // Get the data
   if((num = Rio_readnb(&rio, listBuf, *list_len)) == *list_len) 
   {
-    
     *list = (char*) malloc (*list_len);
     if(*list == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
 

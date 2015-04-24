@@ -157,7 +157,7 @@ int listFilesRequest(rio_t *rio, int connfd) {
      *******************************/
 
     // Obtain data length
-    datalen = numFiles * NAME_SIZE;
+    datalen = NAME_SIZE * numFiles;
 
     // Set reply size according to the protocol
     replySize = currStat + maxBytes + datalen;
@@ -170,7 +170,7 @@ int listFilesRequest(rio_t *rio, int connfd) {
     	return -1; 
     }
     char *replyPtr = reply;
-    printf("%s\n", fileList);
+    printf("%s %s\n", fileList, fileList[1]);
     stat = 0;
 
     // Copy the operational status into reply buffer
@@ -180,8 +180,8 @@ int listFilesRequest(rio_t *rio, int connfd) {
 
     // Copy the data length into reply buffer
     netOrder = htonl(datalen);
-    memcpy(replyPtr, &netOrder, maxBytes);
-    replyPtr += maxBytes;
+    memcpy(replyPtr, &netOrder, datalen);
+    replyPtr += datalen;
 
     // Copy file data into reply buffer
     memcpy(replyPtr, fileList, datalen);
