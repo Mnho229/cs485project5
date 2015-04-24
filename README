@@ -7,7 +7,8 @@ Date: 4/24/15
 Files Included : 
 
 * README
-* MakeFile 
+* MakeFile
+* Documentation.txt 
 
 ----C++ Files-------
 * mcput.cpp 
@@ -15,7 +16,7 @@ Files Included :
 * mcdel.cpp
 * listfiles.cpp
 -------------------
-
+C files
 * cloud_library.c
 * server.c
 
