@@ -406,7 +406,6 @@ int retrieveRequest(rio_t *rio, int connfd)
             rewind(file);
 
             // Allocate memory for the data buffer
-            printf("%d\n", fileSize);
             data = (char*) malloc (sizeof(char)*fileSize);
             if(data == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
 
@@ -423,7 +422,10 @@ int retrieveRequest(rio_t *rio, int connfd)
             	}
         }
     }
-
+    printf("%d\n", fileSize);
+    if (fileSize == 0) {
+        data = (char*) malloc (sizeof(char)*fileSize);
+    }
     // Set message size according to the protocol
     messageSize = currStat + maxBytes + fileSize;
 
