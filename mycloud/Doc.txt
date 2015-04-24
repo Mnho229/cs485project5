@@ -1,0 +1,39 @@
+/////////////////////////////////////
+//
+// Michael Rudy & Russell Brooks
+// University of Kentucky
+// CS 485-001 Fall 2014
+//
+/////////////////////////////////////
+
+/***************
+ * Description *
+ ***************/
+In this project we created our own cloud file storage service called mycloud.  The project is comprised of two parts:
+
+Mycloud server: accepts requests to store a file, retrieve a file, delete a file, and list the files stored on the server. 
+
+MyCloud applications: Four client mycloud applications that will store, retrieve, delete, and list files on your mycloud server.
+
+This project was written in C and utilized the RIO library calls provided by the textbook (in csapp.c and csapp.h) to create and manage the TCP/IP socket interface.
+
+/***************
+ * Limitations *
+ ***************/
+No limitations other than the assumptions listed in the project requirements.
+
+/***************
+ * Algorithms  *
+ ***************/
+The transfer of data across the network is achieved using the provided RIO library calls for TCP/IP socket interfaces.
+
+For reading data from the socket, the following series of steps are generally performed:
+  1) Copy binary data into a buffer whose length is specified by the protocol.
+  2) Use memcpy() to transfer the binary data from the buffer into a corresponding local variable.
+  3) Use ntohl() to convert the binary data to the host machine's endianness (byte order).
+  4) Interpret the converted data as needed to accomplish the desired request
+
+Writing data is performed in a similar but converse manner of the above steps.
+
+On the server, a list of all the files is maintained in memory using a 2D character array and an integer for the number of files listed.  This is achieved through the use of three helper functions for searching files in the list, adding files to the list, and removing files from the list.
+

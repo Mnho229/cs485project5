@@ -1,0 +1,13 @@
+# Compiled source #
+###################
+*.o
+*.swp
+mcdel
+mcget
+mclist
+mcput
+mycloudServer
+
+# Test files #
+##############
+testDoc.txt
