@@ -170,6 +170,7 @@ int listFilesRequest(rio_t *rio, int connfd) {
     	return -1; 
     }
     char *replyPtr = reply;
+    printf("%s\n", fileList);
     stat = 0;
 
     // Copy the operational status into reply buffer
@@ -199,6 +200,7 @@ int addFileToList(char *fileName) {
     if( (fileInList(fileName)) == -1 && (numFiles < 100)) {
 
         strcpy(fileList[numFiles], fileName);
+        printf("%s\n",fileList[numFiles]);
         numFiles++;
         return 0;
     }
