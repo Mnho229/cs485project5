@@ -6,18 +6,19 @@
 
 unsigned int numFiles = 0;
 char fileList[100][NAME_SIZE];
-//test change
+
 int deleteRequest(rio_t *rio, int connfd);
 int listFilesRequest(rio_t *rio, int connfd);
-int addFileToList(char *fileName);
-int removeFileFromList(char *fileName);
-int fileInList(char *fileName);
+int addFileList(char *fileName);
+int removeFileList(char *fileName);
+int checkFileList(char *fileName);
 int checkKey(rio_t *rio, unsigned int SecretKey);
 int getRequest(rio_t *rio);
 int store(rio_t *rio, int connfd);
-int retrieveRequest(rio_t *rio, int connfd);
+int retrieveFile(rio_t *rio, int connfd);
 int deleteRequest(rio_t *rio, int connfd);
 
+//main driver function
 int main(int argc, char **argv) 
 {
     int listenfd, connfd, port;
@@ -51,7 +52,7 @@ int main(int argc, char **argv)
 
 			if (requestType == 0) {
 				printf("Request Type = get\n");
-				status = retrieveRequest(&rio, connfd);
+				status = retrieveFile(&rio, connfd);
 			}
 			else if (requestType == 1) {
 				printf("Request Type = put\n");
@@ -85,6 +86,7 @@ int main(int argc, char **argv)
     exit(0);
 }
 
+//delete requested file from client
 int deleteRequest(rio_t *rio, int connfd) {
     size_t n;
     char fileNameBuf[NAME_SIZE];
@@ -92,10 +94,6 @@ int deleteRequest(rio_t *rio, int connfd) {
     unsigned int netOrder, stat, replySize;
     unsigned int currStat = 4;
     char *reply;   
-
-    /*******************************
-     * Delete Request Message      *
-     *******************************/
     
     // Read file name
     if((n = Rio_readnb(rio, fileNameBuf, NAME_SIZE)) == NAME_SIZE) {
@@ -108,12 +106,8 @@ int deleteRequest(rio_t *rio, int connfd) {
         stat = -1;
     }
 
-    /*******************************
-     * Delete Response Message     *
-     *******************************/
-
     // Check if file is in list and remove it
-    if(removeFileFromList(fileName) == -1) { 
+    if(removeFileList(fileName) == -1) { 
     	stat = -1;
     }
     else {
@@ -122,10 +116,10 @@ int deleteRequest(rio_t *rio, int connfd) {
         else { stat = 0; }
     }
 
-    // Set reply size according to the protocol
+    // Set reply size 
     replySize = currStat;
 
-    // Allocate memory for the reply buffer defined by the protocol
+    // Allocate memory for reply
     reply = (char*) malloc (sizeof(char*)*replySize);
     if(reply == NULL) { 
     	fprintf(stderr, "Memory Error\n"); return -1;
@@ -133,60 +127,57 @@ int deleteRequest(rio_t *rio, int connfd) {
 
     char *replyPtr = reply;
 
-    // Copy the operational stat into reply buffer
+    // status
     netOrder = htonl(stat);
     memcpy(replyPtr, &netOrder, currStat);
     replyPtr += currStat;
 
-    // Send the response reply
+    // Sender
     Rio_writen(connfd, reply, replySize);
     free(reply);
 
     return stat;
 }
 
-// Return 0 if the listing is successful, -1 if fails
+// Returns list of files to client to handle
 int listFilesRequest(rio_t *rio, int connfd) {
     unsigned int datalen, netOrder, stat, replySize;
     unsigned int currStat = 4;
     unsigned int maxBytes = 4;
     char *reply;
 
-    /*******************************
-     * List Files Response Message *
-     *******************************/
-
     // Obtain data length
     datalen = NAME_SIZE * numFiles;
 
-    // Set reply size according to the protocol
+    // Reply size
     replySize = currStat + maxBytes + datalen;
 
-    // Allocate memory for the reply buffer defined by the protocol
+    // Allocate memory for the reply
     reply = (char*) malloc (sizeof(char*)*replySize);
 
     if(reply == NULL) {
     	fprintf(stderr, "Memory Error\n"); 
     	return -1; 
     }
+
     char *replyPtr = reply;
     stat = 0;
 
-    // Copy the operational status into reply buffer
+    // status
     netOrder = htonl(stat);
     memcpy(replyPtr, &netOrder, currStat);
     replyPtr += currStat;
 
-    // Copy the data length into reply buffer
+    // data length
     netOrder = htonl(datalen);
     memcpy(replyPtr, &netOrder, maxBytes);
     replyPtr += maxBytes;
 
-    // Copy file data into reply buffer
+    // data
     memcpy(replyPtr, fileList, datalen);
     replyPtr += datalen;
 
-    // Send the response reply
+    // Sender
     Rio_writen(connfd, reply, replySize);
     free(reply);
 
@@ -194,9 +185,9 @@ int listFilesRequest(rio_t *rio, int connfd) {
 }
 
 // Adds the file name to the last element of the file list
-// Returns 0 if the file is added to the list, -1 if not added (already in list or list full)
-int addFileToList(char *fileName) {
-    if( (fileInList(fileName)) == -1 && (numFiles < 100)) {
+// Returns 0 if the file is added to the list, -1 if not added
+int addFileList(char *fileName) {
+    if( (checkFileList(fileName)) == -1 && (numFiles < 100)) {
 
         strcpy(fileList[numFiles], fileName);
         printf("%s\n",fileList[numFiles]);
@@ -206,11 +197,11 @@ int addFileToList(char *fileName) {
     return -1;
 }
 
-// Removes the file name from the file list and makes remaining elements continuous
+// Removes the file name from the file list and moves remaining elements
 // Returns 0 if the file is removed from the list, -1 if not removed (not found in list)
-int removeFileFromList(char *fileName) {
+int removeFileList(char *fileName) {
     int i;
-    if (((i = fileInList(fileName)) != -1) && (i < 100 - 1)) {
+    if (((i = checkFileList(fileName)) != -1) && (i < 100 - 1)) {
         // Overwrite file name and move all remaining elements
         memmove(fileList[i], fileList[i+1], numFiles * NAME_SIZE);
         numFiles--;
@@ -225,14 +216,17 @@ int removeFileFromList(char *fileName) {
 }
 
 // Returns the index of the file if in the list, -1 if not in list
-int fileInList(char *fileName) {
+int checkFileList(char *fileName) {
     int i;
     for(i = 0; i < numFiles; i++) {
+
         if(strcmp(fileList[i], fileName) == 0) { return i; }
+
     }
     return -1;
 }
 
+//checks key
 int checkKey(rio_t *rio, unsigned int SecretKey)
 {
 	size_t num;
@@ -242,10 +236,12 @@ int checkKey(rio_t *rio, unsigned int SecretKey)
 
 	if((num = Rio_readnb(rio,buf,key_size)) == key_size)
 	{
+
 		memcpy(&netOrder,&buf,key_size); 
 		clientKey = ntohl(netOrder); 
 
 		printf("Secret Key  =  %d\n",clientKey); 
+
 		if(clientKey == SecretKey)
 		{
 			return 0;
@@ -258,7 +254,7 @@ int checkKey(rio_t *rio, unsigned int SecretKey)
 	return -1; 
 }
 
-
+//grabs request type
 int getRequest(rio_t *rio)
 {
 	size_t num; 
@@ -276,15 +272,16 @@ int getRequest(rio_t *rio)
 	return -1; 
 }
 
+// puts file from client into memory and directory
 int store(rio_t *rio, int connfd)
 {
 	size_t num; 
 	char nameBuf[NAME_SIZE]; 
 	char FileName[NAME_SIZE]; 
 	char FileSize[4];
-	unsigned int filesize, netOrder, stat, messageSize; 
+	unsigned int filesize, netOrder, stat, replySize; 
 	char data_in_file[FILE_SIZE];
-	char  *data, *message; 
+	char  *data, *reply; 
 	FILE *file; 
 	unsigned int maxBytes = 4; 
 
@@ -312,11 +309,13 @@ int store(rio_t *rio, int connfd)
     if((num = Rio_readnb(rio,data_in_file,filesize)) == filesize)
     {
     	data = (char*) malloc(sizeof(char)*filesize); 
+
     	if(data == NULL)
     	{
     		fprintf(stderr, "Memory Error\n"); 
     		return -1; 
     	}
+
     	memcpy(data,&data_in_file,filesize);
     }
     else
@@ -328,7 +327,8 @@ int store(rio_t *rio, int connfd)
     {
     	Fwrite(data, sizeof(char), filesize, file);
     	Fclose(file); 
-    	if(addFileToList(FileName) == 0)
+
+    	if(addFileList(FileName) == 0)
     	{
     		stat = 0; 
     	} 
@@ -344,31 +344,32 @@ int store(rio_t *rio, int connfd)
 
     free(data); 
     unsigned int currStat = 4; 
-    messageSize = currStat;
+    replySize = currStat;
 
-    message = (char*) malloc (sizeof(char*)*messageSize);
-    if(message == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
-    char *messageBuf = message;
+    reply = (char*) malloc (sizeof(char*)*replySize);
+    if(reply == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
+    char *replyBuf = reply;
 
     
     netOrder = htonl(stat);
-    memcpy(messageBuf, &netOrder, currStat);
-    messageBuf += currStat;
+    memcpy(replyBuf, &netOrder, currStat);
+    replyBuf += currStat;
 
-    Rio_writen(connfd, message, messageSize);
-    free(message);
+    Rio_writen(connfd, reply, replySize);
+    free(reply);
 
     return stat;
 
 }
 
-int retrieveRequest(rio_t *rio, int connfd) 
+// gets the file from server to client
+int retrieveFile(rio_t *rio, int connfd) 
 {
 	size_t num;
     char NameBuf[NAME_SIZE];
     char fileName[NAME_SIZE];
-    unsigned int fileSize, netOrder, status, messageSize;
-    char *data, *message;
+    unsigned int fileSize, netOrder, status, replySize;
+    char *data, *reply;
     FILE *file;
     unsigned int currStat = 4;
     unsigned int maxBytes = 4;  
@@ -383,21 +384,22 @@ int retrieveRequest(rio_t *rio, int connfd)
         status = -1;
     }
 
-    if(fileInList(fileName) == -1) 
+    if(checkFileList(fileName) == -1) 
     	{ 
     		fileSize = 0; 
     		status = -1; 
     	}
     else 
     {
-        // Check if file exists and open it
+        // Check for the eternal existence of the file in question
         file = fopen(fileName, "r");
+
         if(file == 0) 
-        	{ 
-        		fprintf(stderr, "Cannot open input file\n"); 
-        		fileSize = 0; 
-        		status = -1; 
-        	}
+        { 
+        	fprintf(stderr, "Cannot open input file\n"); 
+    		fileSize = 0; 
+    		status = -1; 
+        }
         else 
         {
             // Obtain file size
@@ -422,41 +424,41 @@ int retrieveRequest(rio_t *rio, int connfd)
             	}
         }
     }
-    printf("%d\n", fileSize);
+
     if (fileSize == 0) {
         data = (char*) malloc (sizeof(char)*fileSize);
     }
-    // Set message size according to the protocol
-    messageSize = currStat + maxBytes + fileSize;
+    // Set reply size
+    replySize = currStat + maxBytes + fileSize;
 
-    // Allocate memory for the message buffer defined by the protocol
-    message = (char*) malloc (sizeof(char*)*messageSize);
+    // Allocate memory for the reply
+    reply = (char*) malloc (sizeof(char*)*replySize);
 
-    if(message == NULL) 
+    if(reply == NULL) 
     	{ 
     		fprintf(stderr, "Memory Error\n"); 
     		return -1;
     	 }
-    char *messageBuf = message;
+    char *replyBuf = reply;
 
-    // Copy the operational status into message buffer
+    // status
     netOrder = htonl(status);
-    memcpy(messageBuf, &netOrder, currStat);
-    messageBuf += currStat;
+    memcpy(replyBuf, &netOrder, currStat);
+    replyBuf += currStat;
 
-    // Copy the file size into message buffer
+    // File Size integer
     netOrder = htonl(fileSize);
-    memcpy(messageBuf, &netOrder, maxBytes);
-    messageBuf += maxBytes;
+    memcpy(replyBuf, &netOrder, maxBytes);
+    replyBuf += maxBytes;
 
-    // Copy file data into message buffer
-    memcpy(messageBuf, data, fileSize);
-    messageBuf += fileSize;
+    // Data
+    memcpy(replyBuf, data, fileSize);
+    replyBuf += fileSize;
     free(data);
 
-    // Send the response message
-    Rio_writen(connfd, message, messageSize);
-    free(message);
+    // Sender
+    Rio_writen(connfd, reply, replySize);
+    free(reply);
 
     return status;
 }

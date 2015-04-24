@@ -6,13 +6,13 @@
 
 unsigned int numFiles = 0;
 char fileList[100][NAME_SIZE];
-
+//test change
 int deleteRequest(rio_t *rio, int connfd);
 int listFilesRequest(rio_t *rio, int connfd);
 int addFileToList(char *fileName);
 int removeFileFromList(char *fileName);
 int fileInList(char *fileName);
-int validKey(rio_t *rio, unsigned int SecretKey);
+int checkKey(rio_t *rio, unsigned int SecretKey);
 int getRequest(rio_t *rio);
 int store(rio_t *rio, int connfd);
 int retrieveRequest(rio_t *rio, int connfd);
@@ -157,7 +157,7 @@ int listFilesRequest(rio_t *rio, int connfd) {
      *******************************/
 
     // Obtain data length
-    datalen = numFiles * NAME_SIZE;
+    datalen = NAME_SIZE * numFiles;
 
     // Set reply size according to the protocol
     replySize = currStat + maxBytes + datalen;
@@ -199,6 +199,7 @@ int addFileToList(char *fileName) {
     if( (fileInList(fileName)) == -1 && (numFiles < 100)) {
 
         strcpy(fileList[numFiles], fileName);
+        printf("%s\n",fileList[numFiles]);
         numFiles++;
         return 0;
     }
@@ -421,12 +422,16 @@ int retrieveRequest(rio_t *rio, int connfd)
             	}
         }
     }
-
+    printf("%d\n", fileSize);
+    if (fileSize == 0) {
+        data = (char*) malloc (sizeof(char)*fileSize);
+    }
     // Set message size according to the protocol
     messageSize = currStat + maxBytes + fileSize;
 
     // Allocate memory for the message buffer defined by the protocol
     message = (char*) malloc (sizeof(char*)*messageSize);
+
     if(message == NULL) 
     	{ 
     		fprintf(stderr, "Memory Error\n"); 
