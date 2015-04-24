@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char *argv[]) 
 {
     int port, key;
-    int list_length;
+    unsigned int list_length;
     char *list_buff;
     char *host;
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     if (request == 0) {
         char fileName[80];
-        for (int i = 0; i < list_length ; i+=80) {
+        for (size_t i = 0; i < list_length ; i+=80) {
             memcpy(&fileName, list_buff + i, 80);
             printf("%s\n", fileName);
         }

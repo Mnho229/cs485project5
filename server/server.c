@@ -170,7 +170,6 @@ int listFilesRequest(rio_t *rio, int connfd) {
     	return -1; 
     }
     char *replyPtr = reply;
-    printf("%s %s\n", fileList, fileList[1]);
     stat = 0;
 
     // Copy the operational status into reply buffer
@@ -407,6 +406,7 @@ int retrieveRequest(rio_t *rio, int connfd)
             rewind(file);
 
             // Allocate memory for the data buffer
+            printf("%d\n", fileSize);
             data = (char*) malloc (sizeof(char)*fileSize);
             if(data == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
 
@@ -429,6 +429,7 @@ int retrieveRequest(rio_t *rio, int connfd)
 
     // Allocate memory for the message buffer defined by the protocol
     message = (char*) malloc (sizeof(char*)*messageSize);
+
     if(message == NULL) 
     	{ 
     		fprintf(stderr, "Memory Error\n"); 

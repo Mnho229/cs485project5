@@ -232,9 +232,8 @@ int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
   return stat;
 
 }
-int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, int *list_len) 
+int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, unsigned int *list_len) 
 {
-
   int clientfd;
   char *message;
   unsigned int messageSize, netOrder;
@@ -269,7 +268,7 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
   size_t num;
   char statBuf[4];
   char listSizeBuf[4];
-  char listBuf[NAME_SIZE];
+  char listBuf[FILE_SIZE];
   unsigned int stat;
   rio_t rio;
   Rio_readinitb(&rio, clientfd);
@@ -297,7 +296,6 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
   {
     stat = -1;
   }
-
   // Get the data
   if((num = Rio_readnb(&rio, listBuf, *list_len)) == *list_len) 
   {
