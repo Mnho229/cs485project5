@@ -6,13 +6,13 @@
 
 unsigned int numFiles = 0;
 char fileList[100][NAME_SIZE];
-
+//test change
 int deleteRequest(rio_t *rio, int connfd);
 int listFilesRequest(rio_t *rio, int connfd);
 int addFileToList(char *fileName);
 int removeFileFromList(char *fileName);
 int fileInList(char *fileName);
-int validKey(rio_t *rio, unsigned int SecretKey);
+int checkKey(rio_t *rio, unsigned int SecretKey);
 int getRequest(rio_t *rio);
 int store(rio_t *rio, int connfd);
 int retrieveRequest(rio_t *rio, int connfd);

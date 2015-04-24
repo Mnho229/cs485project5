@@ -10,7 +10,8 @@ using namespace std;
 
 int main(int argc, char *argv[]) 
 {
-    int port, key, list_length;
+    int port, key;
+    unsigned int list_length;
     char *list_buff;
     char *host;
 
