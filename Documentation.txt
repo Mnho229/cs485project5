@@ -1,0 +1,17 @@
+----Limitations--------
+* The list function works correctly on Michael's VM but not on Stanley's. 
+* We get warnings on Stanley's VM but not Michael's. 
+* mcput, mcget, mcdel & mclist need to be moved after compiling to another folder i.e client 
+* serv needs to be moved to another folder after compiling, i.e server. 
+
+
+---------Alogrithms----------
+We included csapp.c and csapp.h from the textbook and used the Rio functions readnb and readnitnb to name a few. From csapp we also used the Open_clientfd to open a port. 
+
+To read from the socket we used the following methods. 
+  1) Copy binary data into a buffer whose length is specified by the protocol.
+  2) Use memcpy() to transfer the binary data from the buffer into a local variable.
+  3) Use ntohl() to convert the binary data from network endiannes to the endianness of the local machine 
+  4) Then we used the data to get to the desired method. 
+
+* We kept data in a 2D array. 
