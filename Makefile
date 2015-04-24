@@ -30,7 +30,7 @@ mclistfiles.o: $(CDIR)/mclistfiles.cpp $(CDIR)/cloud_library.c
 	g++ -c $(CDIR)/mclistfiles.cpp $(CDIR)/cloud_library.c 
 
 mclist: $(CDIR)/listfiles.cpp $(CDIR)/csapp.o $(CDIR)/cloud_library.c
-	g++ -g $(CPPFLAGS) $(CDIR)/listfiles.cpp $(CDIR)/csapp.o -lpthread -lm -o mclist 
+	g++ $(CPPFLAGS) $(CDIR)/listfiles.cpp $(CDIR)/csapp.o -lpthread -lm -o mclist 
 
 .PHONY: clean
 clean:
