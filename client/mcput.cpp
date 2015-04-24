@@ -35,5 +35,5 @@ int main(int argc, char *argv[])
     }
 
     int request = mycloud_putfile(host, port, key, filename, const_cast<char *>(data.c_str()), data.length() );
-    exit(0);
+    return request;
 }

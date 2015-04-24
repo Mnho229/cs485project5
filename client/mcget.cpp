@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     int clientfd, port, key, datalen;
     char *host, *filename;
-    char *data = new char[100000];
+    char *data = new char[10000];
     rio_t rio;
 
     if (argc != 5) {

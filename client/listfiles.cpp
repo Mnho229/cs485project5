@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
     char *host;
     rio_t rio;
 
-    if (argc != 5) {
-		fprintf(stderr, "usage: %s <host> <port> <key> <filename>\n", argv[0]);
+    if (argc != 4) {
+		fprintf(stderr, "usage: %s <host> <port> <key> \n", argv[0]);
 		exit(0);
     }
     host = argv[1];

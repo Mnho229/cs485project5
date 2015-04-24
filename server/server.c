@@ -4,12 +4,15 @@
 #define REQUEST_SIZE 4
 #define DNS_SIZE 40
 
+unsigned int numFiles = 0;
+char fileList[100][NAME_SIZE];
+
 int deleteRequest(rio_t *rio, int connfd);
 int listFilesRequest(rio_t *rio, int connfd);
 int addFileToList(char *fileName);
 int removeFileFromList(char *fileName);
 int fileInList(char *fileName);
-int validKey(rio_t *rio, unsigned int secretKey);
+int validKey(rio_t *rio, unsigned int SecretKey);
 int getRequest(rio_t *rio);
 int store(rio_t *rio, int connfd);
 int retrieveRequest(rio_t *rio, int connfd);
@@ -68,7 +71,7 @@ int main(int argc, char **argv)
 		}
 
 		if (status == 0) {
-			printf("Operation Status = success");
+			printf("Operation Status = success\n");
 		}
 		else {
 			printf("Operation Status = error\n");
@@ -225,6 +228,7 @@ int fileInList(char *fileName) {
         if(strcmp(fileList[i], fileName) == 0) { return i; }
     }
     return -1;
+}
 
 int checkKey(rio_t *rio, unsigned int SecretKey)
 {
@@ -233,7 +237,7 @@ int checkKey(rio_t *rio, unsigned int SecretKey)
 	char buf[key_size]; 
 	unsigned int clientKey, netOrder; 
 
-	if((num = Rio_readnb(rio,buf,key_size) == key_size)
+	if((num = Rio_readnb(rio,buf,key_size)) == key_size)
 	{
 		memcpy(&netOrder,&buf,key_size); 
 		clientKey = ntohl(netOrder); 
@@ -256,11 +260,12 @@ int getRequest(rio_t *rio)
 {
 	size_t num; 
 	char buffer[REQUEST_SIZE];
-	unsigned int reqType, netOrder; 
+	unsigned int reqType, netOrder;
 
-	if((n = Rio_readnb(rio,buf,REQUEST_SIZE) == REQUEST_SIZE)
+	if((num = Rio_readnb(rio,buffer,REQUEST_SIZE)) == REQUEST_SIZE)
 	{
-		memcpy(&netOrder,&buf,REQUEST_SIZE); 
+
+		memcpy(&netOrder,&buffer,REQUEST_SIZE);
 		reqType = ntohl(netOrder); 
 
 		return reqType; 
@@ -271,7 +276,7 @@ int getRequest(rio_t *rio)
 int store(rio_t *rio, int connfd)
 {
 	size_t num; 
-	char fileName[NAME_SIZE]; 
+	char nameBuf[NAME_SIZE]; 
 	char FileName[NAME_SIZE]; 
 	char FileSize[4];
 	unsigned int filesize, netOrder, stat, messageSize; 
@@ -280,47 +285,47 @@ int store(rio_t *rio, int connfd)
 	FILE *file; 
 	unsigned int maxBytes = 4; 
 
-	if((n = Rio_readnb(rio, fileName, NAME_SIZE)) == NAME_SIZE) 
+	if((num = Rio_readnb(rio, nameBuf, NAME_SIZE)) == NAME_SIZE) 
 	{
-        memcpy(&FileName, &fileName, NAME_SIZE);
-        printf("Filename  = %s\n", fileName);
+        memcpy(&FileName, &nameBuf, NAME_SIZE);
+        printf("Filename  = %s\n", FileName);
     } 
     else 
     {
         printf("Filename  = NONE\n");
-        status = -1;
+        stat = -1;
     }
 
-    if((n = Rio_readnb(rio,FileSize,maxBytes)) == maxBytes)
+    if((num = Rio_readnb(rio,FileSize,maxBytes)) == maxBytes)
     {
-    	memcpy(&netOrder.&FileSize,maxBytes);
-    	fileSize = ntohl(netOrder); 
+    	memcpy(&netOrder,&FileSize,maxBytes);
+    	filesize = ntohl(netOrder); 
     }
     else
     {
     	stat = -1; 
     }
 
-    if((n = Rio_readnb(rio,data_in_file,filesize)) == filesize)
+    if((num = Rio_readnb(rio,data_in_file,filesize)) == filesize)
     {
     	data = (char*) malloc(sizeof(char)*filesize); 
     	if(data == NULL)
     	{
     		fprintf(stderr, "Memory Error\n"); 
     		return -1; 
-    		memcpy(data,&data_in_file,filesize);
     	}
+    	memcpy(data,&data_in_file,filesize);
     }
     else
     {
-    	status = -1; 
+    	stat = -1; 
     }
 
-    if((file = Fopen(fileName,"w")) != NULL)
+    if((file = Fopen(nameBuf,"w")) != NULL)
     {
     	Fwrite(data, sizeof(char), filesize, file);
     	Fclose(file); 
-    	if(addFileToList(filename) == 0)
+    	if(addFileToList(FileName) == 0)
     	{
     		stat = 0; 
     	} 
@@ -338,21 +343,19 @@ int store(rio_t *rio, int connfd)
     unsigned int currStat = 4; 
     messageSize = currStat;
 
-    
     message = (char*) malloc (sizeof(char*)*messageSize);
     if(message == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
     char *messageBuf = message;
 
     
-    netOrder = htonl(status);
+    netOrder = htonl(stat);
     memcpy(messageBuf, &netOrder, currStat);
     messageBuf += currStat;
-
 
     Rio_writen(connfd, message, messageSize);
     free(message);
 
-    return status;
+    return stat;
 
 }
 
@@ -404,7 +407,7 @@ int retrieveRequest(rio_t *rio, int connfd)
             if(data == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
 
             // Copy file data into data buffer
-            if((n = fread(data, 1, fileSize, file)) == fileSize) 
+            if((num = fread(data, 1, fileSize, file)) == fileSize) 
             	{ 
             		fclose(file); 
             		status = 0; 
