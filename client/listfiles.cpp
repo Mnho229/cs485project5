@@ -10,10 +10,9 @@ using namespace std;
 
 int main(int argc, char *argv[]) 
 {
-    int clientfd, port, key, list_length;
+    int port, key, list_length;
     char *list_buff;
     char *host;
-    rio_t rio;
 
     if (argc != 4) {
 		fprintf(stderr, "usage: %s <host> <port> <key> \n", argv[0]);

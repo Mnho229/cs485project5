@@ -10,9 +10,9 @@ using namespace std;
 
 int main(int argc, char *argv[]) 
 {
-    int clientfd, port, key;
+    int port, key;
     char *host, *filename;
-    rio_t rio;
+
 
     if (argc != 5) {
 		fprintf(stderr, "usage: %s <host> <port> <key> <filename>\n", argv[0]);

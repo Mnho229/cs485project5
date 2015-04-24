@@ -4,67 +4,74 @@
 #define REQUEST_SIZE 4
 #define DNS_SIZE 40
 
-int mycloud_putfile(char *MachineName, int TCPport, int SecretKey, char *FileName, char *data, int datalen) {
+int mycloud_putfile(char *MachineName, int TCPport, int SecretKey, char *FileName, char *data, int datalen) 
+{
+
   int clientfd;
   char *message;
   unsigned int messageSize, netOrder;
 
-  // Set message size according to the protocol
+  // Sets the size of the message. 
   messageSize = 4 + REQUEST_SIZE + NAME_SIZE + 4 + datalen;
 
-  // Allocate memory for the message buffer defined by the protocol
+  // Allocates memory to the message using the message 
   message = (char*) malloc (sizeof(char)*messageSize);
-  if(message == NULL) { fprintf(stderr, "Memory Error - mcputs\n"); return -1; }
-  char *messagePtr = message;
+  // if the message is null meaning empty then it reports a memory error and returns -1. 
+  if(message == NULL) 
+  { 
+    fprintf(stderr, "Memory Error - mcputs\n"); 
+    return -1; 
+  }
+  //This duplicates the message into buffer. 
+  char *messageBuf = message;
 
-  // Copy secret key into message buffer
+  // This puts the secret key into the messagebuf my copying the memory. 
   netOrder = htonl(SecretKey);
-  memcpy(messagePtr, &netOrder, 4);
-  messagePtr += 4;
+  memcpy(messageBuf, &netOrder, 4);
+  messageBuf += 4;
 
-  // Copy request type into message buffer
+  // This adds the request into the messageBuf.
   unsigned int request = 1;
   netOrder = htonl(request);
-  memcpy(messagePtr, &netOrder, REQUEST_SIZE);
-  messagePtr += REQUEST_SIZE;
+  memcpy(messageBuf, &netOrder, REQUEST_SIZE);
+  messageBuf += REQUEST_SIZE;
 
-  // Copy file name into message buffer
-  memcpy(messagePtr, FileName, NAME_SIZE);
-  messagePtr += NAME_SIZE;
+  // CAdds the filename to the messageBuf
+  memcpy(messageBuf, FileName, NAME_SIZE);
+  messageBuf += NAME_SIZE;
 
-  // Copy file size into message buffer
+  // Adds the size of the file into the messageBuf 
   netOrder = htonl(datalen);
-  memcpy(messagePtr, &netOrder, 4);
-  messagePtr += 4;
+  memcpy(messageBuf, &netOrder, 4);
+  messageBuf += 4;
 
   // Copy file data into message buffer
-  memcpy(messagePtr, data, datalen);
-  messagePtr += datalen;
+  memcpy(messageBuf, data, datalen);
+  messageBuf += datalen;
 
   clientfd = Open_clientfd(MachineName, TCPport);
   Rio_writen(clientfd, message, messageSize);
   free(message);
 
-  //
-  // Receieve operational status
-  //
-  size_t n;
+  // This checks to make sure that the operation. 
+  size_t num;
   char buf[4];
-  unsigned int status;
+  unsigned int stat;
   rio_t rio;
   Rio_readinitb(&rio, clientfd);
   
-  status = -1;
-  if((n = Rio_readnb(&rio, buf, 4)) == 4) {
+  stat = -1;
+  if((num = Rio_readnb(&rio, buf, 4)) == 4) {
     // Copy binary data from buffer
     memcpy(&netOrder, &buf, 4);
-    status = ntohl(netOrder);
+    stat = ntohl(netOrder);
   }
   Close(clientfd);
-  return status;
+  return stat; // Returns the status for checking in the server. 
 }
 
-int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filename, char **data, int *datalen) {
+int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filename, char **data, int *datalen) 
+{
 
   int clientfd;
   char *message;
@@ -72,85 +79,104 @@ int mycloud_getfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 
   messageSize = 4 + REQUEST_SIZE + NAME_SIZE;
 
-  // Allocate memory for the message buffer defined by the protocol
+  // Allocates memory to the message using the message 
   message = (char*) malloc (sizeof(char)*messageSize);
-  if(message == NULL) { fprintf(stderr, "Memory Error - mcputs\n"); return -1; }
-  char *messagePtr = message;
 
-  // Copy secret key into message buffer
+  // if the message is null meaning empty then it reports a memory error and returns -1. 
+  if(message == NULL) 
+    { 
+        fprintf(stderr, "Memory Error ~ mcget\n"); 
+        return -1; 
+    }
+  char *messageBuf = message;
+
+  // Adds the secret key into the messagebuf my copying the memory. 
   netOrder = htonl(SecretKey);
-  memcpy(messagePtr, &netOrder, 4);
-  messagePtr += 4;
+  memcpy(messageBuf, &netOrder, 4);
+  messageBuf += 4;
 
-  // Copy request type into message buffer
+  // This adds the request type ie get into the messageBuf.
   unsigned int request = 0;
   netOrder = htonl(request);
-  memcpy(messagePtr, &netOrder, REQUEST_SIZE);
-  messagePtr += REQUEST_SIZE;
+  memcpy(messageBuf, &netOrder, REQUEST_SIZE);
+  messageBuf += REQUEST_SIZE;
 
-  // Copy file name into message buffer
-  memcpy(messagePtr, Filename, NAME_SIZE);
-  messagePtr += NAME_SIZE;
+  // Adds the filename into the messageBuf
+  memcpy(messageBuf, Filename, NAME_SIZE);
+  messageBuf += NAME_SIZE;
 
+  // Opens a connection to the server. 
   clientfd = Open_clientfd(MachineName, TCPport);
   Rio_writen(clientfd, message, messageSize);
   free(message);
 
-  //
-  // Receieve operational status
-  //
   
-  size_t n;
+  size_t num;
   int GET_STATUS = 4 + 4 + NAME_SIZE;
   char buf[GET_STATUS];
   char fileSizeBuf[4];
   char dataBuf[NAME_SIZE];
-  unsigned int status, bytesInFile;
+  unsigned int stat, bytesInFile;
   
   rio_t rio;
   Rio_readinitb(&rio, clientfd);
 
 
-  if((n = Rio_readnb(&rio, buf, 4)) == 4) {
-    // Copy binary data from buffer
+  if((num = Rio_readnb(&rio, buf, 4)) == 4) 
+  {
+    // Copies the bit data into the buffer. 
     memcpy(&netOrder, &buf, 4);
-    status = ntohl(netOrder);
-  //  printf("Status: %d\n", status);
-  } else {
-    status = -1;
-    //printf("status read failed\n");
+    stat = ntohl(netOrder);
+  //  printf("Status: %d\n", stat);
+  } 
+  else 
+  {
+    stat = -1;
+    //printf("stat read failed\n");
   }
 
 
-  if((n = Rio_readnb(&rio, fileSizeBuf, 4)) == 4) {
+  if((num = Rio_readnb(&rio, fileSizeBuf, 4)) == 4) 
+  {
     memcpy(&netOrder, &fileSizeBuf, 4);
     *datalen = htonl(netOrder);
     //printf("bytes in file dl: %d \n", *datalen);
-  } else {
-    status = -1;
+  } 
+  else 
+  {
+    stat = -1;
     //printf("max bytes failed\n");
   }
 
   //need to do this in order to Rio_readnb to work
   bytesInFile = *datalen;
   
-  if((n = Rio_readnb(&rio, dataBuf, bytesInFile)) == bytesInFile) {
+  if((num = Rio_readnb(&rio, dataBuf, bytesInFile)) == bytesInFile) 
+  {
 
     *data = (char*) malloc (sizeof(char)*bytesInFile);
-    if (*data == NULL) {fprintf(stderr, "Memory Error - mcgets \n"); return -1;}
+    
+    if (*data == NULL) 
+      {
+        fprintf(stderr, "Memory Error - mcgets \n"); 
+        return -1;
+      }
     memcpy(*data, &dataBuf, bytesInFile);
   
     //printf("client received %d bytes \n", (int)n);
-  } else {
-    status = -1;
+  } 
+  else 
+  {
+    stat = -1;
     //printf("could not retrieve file data\n");
   }
 
-  Close(clientfd);
+  Close(clientfd); // Closes the open server. 
 
-  return status;
+  return stat;
 }
-int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filename) { 
+int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filename) 
+{ 
 
   int clientfd;
   char *message;
@@ -160,49 +186,54 @@ int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
 
   // Allocate memory for the message buffer defined by the protocol
   message = (char*) malloc (sizeof(char)*messageSize);
-  if(message == NULL) { fprintf(stderr, "Memory Error - mcputs\n"); return -1; }
-  char *messagePtr = message;
+  if(message == NULL) 
+    { 
+      fprintf(stderr, "Memory Error ~ mcdel\n");
+      return -1;
+     }
+  char *messageBuf = message;
 
-  // Copy secret key into message buffer
+  // Copies the secret key into message buffer
   netOrder = htonl(SecretKey);
-  memcpy(messagePtr, &netOrder, 4);
-  messagePtr += 4;
+  memcpy(messageBuf, &netOrder, 4);
+  messageBuf += 4;
 
-  // Copy request type into message buffer
+  // Copies the request type into message buffer
   unsigned int request = 2;
   netOrder = htonl(request);
-  memcpy(messagePtr, &netOrder, REQUEST_SIZE);
-  messagePtr += REQUEST_SIZE;
+  memcpy(messageBuf, &netOrder, REQUEST_SIZE);
+  messageBuf += REQUEST_SIZE;
 
-  // Copy file name into message buffer
-  memcpy(messagePtr, Filename, NAME_SIZE);
-  messagePtr += NAME_SIZE;
+  // Copies the file name into message buffer
+  memcpy(messageBuf, Filename, NAME_SIZE);
+  messageBuf += NAME_SIZE;
 
+  // opens a connection 
   clientfd = Open_clientfd(MachineName, TCPport);
   Rio_writen(clientfd, message, messageSize);
   //Close(clientfd);
   free(message);
 
-  //
-  // Receieve operational status
-  //
-  size_t n;
+  //checks status of the operation. 
+  size_t num;
   char buf[4];
-  unsigned int status;
+  unsigned int stat;
   rio_t rio;
   Rio_readinitb(&rio, clientfd);
   
-  status = -1;
-  if((n = Rio_readnb(&rio, buf, 4)) == 4) {
+  stat = -1;
+  if((num = Rio_readnb(&rio, buf, 4)) == 4) 
+  {
     // Copy binary data from buffer
     memcpy(&netOrder, &buf, 4);
-    status = ntohl(netOrder);
+    stat = ntohl(netOrder);
   }
   Close(clientfd);
-  return status;
+  return stat;
 
 }
-int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, int *list_len) {
+int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, int *list_len) 
+{
 
   int clientfd;
   char *message;
@@ -210,69 +241,80 @@ int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list
 
   messageSize = 4 + REQUEST_SIZE;
 
-  // Allocate memory for the message buffer defined by the protocol
+
   message = (char*) malloc (sizeof(char)*messageSize);
-  if(message == NULL) { fprintf(stderr, "Memory Error - mclist\n"); return -1; }
-  char *messagePtr = message;
+  if(message == NULL) 
+    { 
+      fprintf(stderr, "Memory Error - mclist\n"); 
+      return -1;
+     }
+  char *messageBuf = message;
 
-  // Copy secret key into message buffer
+
   netOrder = htonl(SecretKey);
-  memcpy(messagePtr, &netOrder, 4);
-  messagePtr += 4;
+  memcpy(messageBuf, &netOrder, 4);
+  messageBuf += 4;
 
-  // Copy request type into message buffer
   unsigned int request = 3;
   netOrder = htonl(request);
-  memcpy(messagePtr, &netOrder, REQUEST_SIZE);
-  messagePtr += REQUEST_SIZE;
+  memcpy(messageBuf, &netOrder, REQUEST_SIZE);
+  messageBuf += REQUEST_SIZE;
 
-  // Write to server
+  // Opens a connection then writes to the server. 
   clientfd = Open_clientfd(MachineName, TCPport);
   Rio_writen(clientfd, message, messageSize);
   free(message);
 
-  //
-  // Receieve operational status
-  //
-  size_t n;
-  char statusBuf[4];
+ 
+  size_t num;
+  char statBuf[4];
   char listSizeBuf[4];
   char listBuf[NAME_SIZE];
-  unsigned int status;
+  unsigned int stat;
   rio_t rio;
   Rio_readinitb(&rio, clientfd);
 
-  // Get the status
-  if((n = Rio_readnb(&rio, statusBuf, 4)) == 4) {
-    // Copy binary data from buffer
-    memcpy(&netOrder, &statusBuf, 4);
-    status = ntohl(netOrder);
-  } else {
-    status = -1;
+  // Get the stat
+  if((num = Rio_readnb(&rio, statBuf, 4)) == 4) 
+  {
+   
+    memcpy(&netOrder, &statBuf, 4);
+    stat = ntohl(netOrder);
+  } 
+  else 
+  {
+    stat = -1;
   }
 
   // Get the list size
-  if((n = Rio_readnb(&rio, listSizeBuf, 4)) == 4) {
+  if((num = Rio_readnb(&rio, listSizeBuf, 4)) == 4) 
+  {
     // Copy binary data from buffer
     memcpy(&netOrder, &listSizeBuf, 4);
     *list_len = ntohl(netOrder);
-  } else {
-    status = -1;
+  } 
+  else 
+  {
+    stat = -1;
   }
 
   // Get the data
-  if((n = Rio_readnb(&rio, listBuf, *list_len)) == *list_len) {
-    // Allocate memory for the data
+  if((num = Rio_readnb(&rio, listBuf, *list_len)) == *list_len) 
+  {
+    
     *list = (char*) malloc (*list_len);
     if(*list == NULL) { fprintf(stderr, "Memory Error\n"); return -1; }
 
-    // Copy binary data from buffer
+ 
     memcpy(*list, &listBuf, *list_len);
-    status = 0;
-  } else {
-    status = -1;
+    stat = 0;
+  } 
+
+  else 
+  {
+    stat = -1;
   }
 
   Close(clientfd);
-  return status;
+  return stat;
 }

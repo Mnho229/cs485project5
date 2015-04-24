@@ -23,8 +23,7 @@ int main(int argc, char **argv)
     int listenfd, connfd, port;
     socklen_t clientlen;
     struct sockaddr_in clientaddr;
-    struct hostent *hp;
-    char *haddrp;
+    struct hostent;
 	unsigned int secretKey;
     if (argc != 3) 
     {
@@ -44,8 +43,9 @@ int main(int argc, char **argv)
 		int status = -1;
 		rio_t rio;
 		Rio_readinitb(&rio, connfd);
-
-		if (checkKey(&rio, secretKey) == 0) {
+        int KeyCheck = checkKey(&rio, secretKey); 
+		if (KeyCheck == 0) 
+        {
 
 			requestType = getRequest(&rio);
 
@@ -70,10 +70,12 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if (status == 0) {
-			printf("Operation Status = success\n");
+		if (status == 0) 
+        {
+			printf("Operation Status = Success\n");
 		}
-		else {
+		else 
+        {
 			printf("Operation Status = error\n");
 		}
 		printf("-------------------------------\n");
