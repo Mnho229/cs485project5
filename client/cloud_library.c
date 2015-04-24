@@ -232,7 +232,7 @@ int mycloud_delfile(char *MachineName, int TCPport, int SecretKey, char *Filenam
   return stat;
 
 }
-int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, unsigned int *list_len) 
+int mycloud_listfiles(char *MachineName, int TCPport, int SecretKey, char **list, int *list_len) 
 {
 
   int clientfd;

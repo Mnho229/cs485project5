@@ -180,8 +180,8 @@ int listFilesRequest(rio_t *rio, int connfd) {
 
     // Copy the data length into reply buffer
     netOrder = htonl(datalen);
-    memcpy(replyPtr, &netOrder, datalen);
-    replyPtr += datalen;
+    memcpy(replyPtr, &netOrder, maxBytes);
+    replyPtr += maxBytes;
 
     // Copy file data into reply buffer
     memcpy(replyPtr, fileList, datalen);
