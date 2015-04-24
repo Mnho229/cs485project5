@@ -1,0 +1,30 @@
+Michael Ho
+Stanley McClister 
+
+CS 485-001 
+Date: 4/24/15 
+
+Files Included : 
+
+* README
+* MakeFile 
+
+----C++ Files-------
+* mcput.cpp 
+* mcget.cpp
+* mcdel.cpp
+* listfiles.cpp
+-------------------
+
+* cloud_library.c
+* server.c
+
+----Limitations--------
+* The list function works correctly on Michael's VM but not on Stanley's. 
+* We get warnings on Stanley's VM but not Michael's. 
+* mcput, mcget, mcdel & mclist need to be moved after compiling to another folder i.e client 
+* serv needs to be moved to another folder after compiling, i.e server. 
+
+
+---------Alogrithms----------
+We included csapp.c and csapp.h from the textbook and used the Rio functions readnb and readnitnb to name a few. From csapp we also used the Open_clientfd to open a port
